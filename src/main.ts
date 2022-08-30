@@ -3,7 +3,8 @@ import { graphqlHTTP } from 'express-graphql';
 import {
   GraphQLSchema,
   GraphQLObjectType,
-  GraphQLString
+  GraphQLString,
+  GraphQLList,
 } from 'graphql';
 
 const DocumentType = new GraphQLObjectType({
@@ -21,10 +22,23 @@ const DocumentType = new GraphQLObjectType({
 
 const RootQuery = new GraphQLObjectType({
   name: 'RootQueryType',
-  fields: 
+  fields: {
+    getAllDocuments: {
+      type: new GraphQLList(DocumentType),
+      args: {
+        id: { type: GraphQLString }
+      },
+      resolve(parent, args) {
+        return [];
+      }
+    }
+  }
 });
 
-const Mutation = '';
+const Mutation = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: {}
+});
 
 const schema = new GraphQLSchema({
   query: RootQuery,
