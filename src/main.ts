@@ -1,64 +1,25 @@
 import express from 'express';
-import { graphqlHTTP } from 'express-graphql';
-import {
-  GraphQLSchema,
-  GraphQLObjectType,
-  GraphQLString,
-  GraphQLList,
-} from 'graphql';
+import mongoose from 'mongoose';
+import { ApolloServer } from 'apollo-server-express';
+require('dotenv').config();
 
-const DocumentType = new GraphQLObjectType({
-  name: 'Document',
-  fields: () => ({
-    _id: { type: GraphQLString, },
-    user: { type: GraphQLString, },
-    template: { type: GraphQLString, },
-    title: { type: GraphQLString, },
-    slug: { type: GraphQLString, },
-    created_at: { type: GraphQLString, },
-    updated_at: { type: GraphQLString, },
-  })
-});
+import schema from './schema';
+import resolvers from './resolvers';
 
-const RootQuery = new GraphQLObjectType({
-  name: 'RootQueryType',
-  fields: {
-    getAllDocuments: {
-      type: new GraphQLList(DocumentType),
-      args: {
-        id: { type: GraphQLString }
-      },
-      resolve(parent, args) {
-        return [];
-      }
-    }
-  }
-});
-
-const Mutation = new GraphQLObjectType({
-  name: 'Mutation',
-  fields: {}
-});
-
-const schema = new GraphQLSchema({
-  query: RootQuery,
-  mutation: Mutation,
-});
-
-var root = {
-  hello: () => {
-    return 'Hello world!';
-  },
-};
-
-var app = express();
-
-app.use('/graphql', graphqlHTTP({
-  schema: schema,
-  rootValue: root,
-  graphiql: true,
-}));
-
-app.listen(4000, () => {
-  console.log('Running a GraphQL API server at http://localhost:4000/graphql');
-});
+(async () => {
+  await mongoose.connect(process.env.MONGODB_CONNECTION);
+  
+  var app = express();
+  
+  const server = new ApolloServer({
+    typeDefs: schema,
+    resolvers: resolvers,
+  });
+  
+  await server.start();
+  server.applyMiddleware({ app });
+  
+  app.listen({ port: 4000 }, () =>
+    console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
+  );
+})()

@@ -1,0 +1,7 @@
+method: GET
+endpoint: graphql
+params: {"query": "query { documents { title } }"}
+body: {"query": "query { documents { title } }"}
+headers:
+  Content-Type: application/json
+  Accept: application/json
